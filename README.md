@@ -4,6 +4,12 @@ Chat UI is an open-source alternative to the ChatGPT UI. It allows you to intera
 
 This code shows you what you can do with streaming, and more. It also includes a list of some useful prompts that are pre-selected.
 
+![UI Image](./public/chat-ui.png "Chat UI")
+
+[Demo](https://)
+
+[chat.maxaljadery.com](https://chat.maxaljadery.com)
+
 
 ## Deployment
 
