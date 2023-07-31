@@ -21,7 +21,7 @@ model Chat {
   created_at DateTime @default(now())
   name       String?
   messages   String?
-  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id])
   userId     String?
 
   @@index([userId], name: "userId")
