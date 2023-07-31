@@ -218,13 +218,12 @@ export default function Chat({
             setChat('');
 
             const key = localStorage.getItem('key');
+
             if (!key) {
               toast.error('Make sure to add your OpenAI key', {
                 className: 'font-medium text-sm text-[#363636]',
               });
-              return;
-            }
-            if (!selectedChat) {
+            } else if (!selectedChat) {
               setCreating(true);
               createChat(userId).then((value) => {
                 setSelectedChat(value?.id);
