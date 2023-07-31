@@ -1,11 +1,10 @@
 import { Configuration, OpenAIApi } from 'openai-edge'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { prisma } from "../../../utils/prisma"
 
 export const runtime = 'edge'
 
 export default async function POST(req: Request) {
-  const { messages, key, chatId } = await req.json()
+  const { messages, key, model } = await req.json()
 
   const config = new Configuration({
     apiKey: key
@@ -14,7 +13,7 @@ export default async function POST(req: Request) {
   const openai = new OpenAIApi(config)
 
   const response = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
+    model: model == "gpt-3.5" ? 'gpt-3.5-turbo' : "gpt-4",
     stream: true,
     messages
   })

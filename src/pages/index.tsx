@@ -28,6 +28,7 @@ export default function Home() {
       body: {
         key: key,
         chatId: selectedChat,
+        model: model,
       },
     });
 
