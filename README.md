@@ -6,7 +6,7 @@ This code shows you what you can do with streaming, and more. It also includes a
 
 ![UI Image](./public/chat-ui.png "Chat UI")
 
-[Demo](https://)
+[Demo](https://www.loom.com/share/963fb2c13cf6400fac71771ece1050cf?sid=b6a6c13b-54d3-413c-82e6-a2d3e2e02909)
 
 [chat.maxaljadery.com](https://chat.maxaljadery.com)
 
