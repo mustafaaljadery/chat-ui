@@ -351,8 +351,8 @@ function OpenAI() {
           <ModalBody>
             <div className="flex flex-col justify-center items-center">
               <p className="text-xs text-center font-regular text-gray-400">
-                Your API key is stored on the browser and isn't stored
-                anywhere else.
+                Your API key is stored on the browser and isn&apos;t
+                stored anywhere else.
               </p>
               <div className="mt-6 flex flex-col w-full space-y-3">
                 <div className="flex flex-row space-x-1.5">
@@ -742,9 +742,10 @@ export default function Sidebar({
                   new Date(b?.created_at) - new Date(a?.created_at)
                 );
               })
-              .map((chat) => {
+              .map((chat: any, index: number) => {
                 return (
                   <Chat
+                    key={index}
                     chat={chat}
                     chats={chats}
                     setChats={setChats}
