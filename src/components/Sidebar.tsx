@@ -527,9 +527,12 @@ function PromptModal({ chat, setChat }: PromptProps) {
           <ModalCloseButton />
           <ModalBody>
             <div className=" flex w-full flex-col space-y-2">
-              {Prompts.map((prompt) => {
+              {Prompts.map((prompt: any, index: number) => {
                 return (
-                  <div className="flex flex-row justify-between items-between space-x-3">
+                  <div
+                    key={index}
+                    className="flex flex-row justify-between items-between space-x-3"
+                  >
                     <p className="font-semibold text-[#363636] my-auto">
                       {prompt?.title}
                     </p>
