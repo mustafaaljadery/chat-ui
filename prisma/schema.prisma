@@ -19,18 +19,10 @@ model User {
 }
 
 model Chat {
-  id         String    @id @default(uuid())
-  created_at DateTime  @default(now())
-  name       String?
-  messages   Message[]
-  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String?
-}
-
-model Message {
   id         String   @id @default(uuid())
   created_at DateTime @default(now())
-  text       String?
-  chat       Chat?    @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId     String?
+  name       String?
+  messages   String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?
 }

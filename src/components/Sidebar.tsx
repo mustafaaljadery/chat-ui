@@ -27,6 +27,11 @@ interface Props {
   setModel: Dispatch<SetStateAction<string>>;
   chat: any;
   setChat: Dispatch<SetStateAction<any>>;
+  refetchChats: boolean;
+  setRefetchChats: Dispatch<SetStateAction<boolean>>;
+  selectedChat: string;
+  setSelectedChat: Dispatch<SetStateAction<string>>;
+  setMessages: Dispatch<SetStateAction<any>>;
 }
 
 interface SettingsProps {
@@ -34,11 +39,21 @@ interface SettingsProps {
   setModel: Dispatch<SetStateAction<string>>;
 }
 
-interface ChatProps {
+interface ChatDialogProps {
   id: string;
-  name: string;
+  setRefetchChats: Dispatch<SetStateAction<boolean>>;
+  setSelectedChat: Dispatch<SetStateAction<string>>;
+  setMessages: Dispatch<SetStateAction<any>>;
+}
+
+interface ChatProps {
+  chat: any;
   chats: any;
   setChats: Dispatch<SetStateAction<any>>;
+  selectedChat: string;
+  setSelectedChat: Dispatch<SetStateAction<string>>;
+  setRefetchChats: Dispatch<SetStateAction<boolean>>;
+  setMessages: Dispatch<SetStateAction<any>>;
 }
 
 interface PromptProps {
@@ -121,17 +136,6 @@ async function getChats(userId: string) {
   }
 }
 
-async function createChat(userId: string) {
-  try {
-    const result = await axios.post(`/api/chat/create`, {
-      userId: userId,
-    });
-    return result.data;
-  } catch (e) {
-    console.log(e);
-  }
-}
-
 async function renameChat(chatId: string, newName: string) {
   try {
     const result = await axios.post(`/api/chat/rename`, {
@@ -146,13 +150,158 @@ async function renameChat(chatId: string, newName: string) {
 
 async function deleteChat(chatId: string) {
   try {
-    const result = await axios.post(`/api/chart/delete`, {
+    const result = await axios.post(`/api/chat/delete`, {
       chatId: chatId,
     });
     return result.data;
   } catch (e) {
     console.log(e);
   }
+}
+
+function RenameDialog({ id, setRefetchChats }: ChatDialogProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [newName, setNewName] = useState('');
+  const finalRef = useRef<any>(null);
+
+  return (
+    <>
+      <button className="my-auto" onClick={onOpen}>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="my-auto"
+        >
+          <path
+            d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z"
+            fill="#363636"
+            fillRule="evenodd"
+            clipRule="evenodd"
+          ></path>
+        </svg>
+      </button>
+      <Modal
+        finalFocusRef={finalRef}
+        isOpen={isOpen}
+        onClose={onClose}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Rename Chat</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <div className="flex flex-col space-y-2 justify-start w-full items-start">
+              <p className="text-sm font-medium text-[#363636]">
+                Name
+              </p>
+              <input
+                value={newName}
+                onChange={(e) => {
+                  setNewName(e.target.value);
+                }}
+                className="text-sm border px-3 py-1.5 rounded w-full focus:ring-0 focus:outline-none"
+                placeholder="New name..."
+                type="text"
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter className="flex flex-row space-x-4 mt-4">
+            <button
+              onClick={onClose}
+              className="text-sm px-4 py-1 font-medium  text-white bg-[#363636] rounded hover:opacity-90"
+            >
+              Close
+            </button>
+            <button
+              className="text-sm px-4 py-1 font-medium hover:opacity-90 text-white bg-[#FF623D] rounded"
+              onClick={() => {
+                onClose();
+                renameChat(id, newName).then(() => {
+                  setRefetchChats(true);
+                });
+              }}
+            >
+              Rename
+            </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
+
+function DeleteDialog({
+  id,
+  setRefetchChats,
+  setSelectedChat,
+  setMessages,
+}: ChatDialogProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const finalRef = useRef<any>(null);
+  return (
+    <>
+      <button onClick={onOpen} className="my-auto">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="my-auto"
+        >
+          <path
+            d="M5.5 1C5.22386 1 5 1.22386 5 1.5C5 1.77614 5.22386 2 5.5 2H9.5C9.77614 2 10 1.77614 10 1.5C10 1.22386 9.77614 1 9.5 1H5.5ZM3 3.5C3 3.22386 3.22386 3 3.5 3H5H10H11.5C11.7761 3 12 3.22386 12 3.5C12 3.77614 11.7761 4 11.5 4H11V12C11 12.5523 10.5523 13 10 13H5C4.44772 13 4 12.5523 4 12V4L3.5 4C3.22386 4 3 3.77614 3 3.5ZM5 4H10V12H5V4Z"
+            fill="#363636"
+            fillRule="evenodd"
+            clipRule="evenodd"
+          ></path>
+        </svg>
+      </button>
+      <Modal
+        finalFocusRef={finalRef}
+        isOpen={isOpen}
+        onClose={onClose}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Chat</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-xs text-center font-regular text-gray-400">
+                Are you sure you want to delete this chat? You will
+                lose all of your messages.
+              </p>
+            </div>
+          </ModalBody>
+          <ModalFooter className="flex flex-row space-x-4 mt-4">
+            <button
+              onClick={onClose}
+              className="text-sm px-4 py-1 font-medium  text-white bg-[#363636] rounded hover:opacity-90"
+            >
+              Close
+            </button>
+            <button
+              className="text-sm px-4 py-1 font-medium text-white bg-[#FF623D] rounded"
+              onClick={() => {
+                onClose();
+                setSelectedChat('');
+                setMessages([]);
+                deleteChat(id).then(() => {
+                  setRefetchChats(true);
+                });
+              }}
+            >
+              Delete
+            </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
 }
 
 function OpenAI() {
@@ -425,8 +574,61 @@ function NoData() {
   );
 }
 
-function Chat() {
-  return <div className="flex flex-row"></div>;
+function Chat({
+  chat,
+  chats,
+  setChats,
+  selectedChat,
+  setSelectedChat,
+  setRefetchChats,
+  setMessages,
+}: ChatProps) {
+  return (
+    <button
+      onClick={() => {
+        setSelectedChat(chat?.id);
+      }}
+      className={
+        'flex flex-row w-full justify-between py-2 items-between rounded px-3 ' +
+        (chat?.id == selectedChat ? 'bg-gray-200' : '')
+      }
+    >
+      <div className="flex flex-row space-x-3">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="my-auto"
+        >
+          <path
+            d="M12.5 3L2.5 3.00002C1.67157 3.00002 1 3.6716 1 4.50002V9.50003C1 10.3285 1.67157 11 2.5 11H7.50003C7.63264 11 7.75982 11.0527 7.85358 11.1465L10 13.2929V11.5C10 11.2239 10.2239 11 10.5 11H12.5C13.3284 11 14 10.3285 14 9.50003V4.5C14 3.67157 13.3284 3 12.5 3ZM2.49999 2.00002L12.5 2C13.8807 2 15 3.11929 15 4.5V9.50003C15 10.8807 13.8807 12 12.5 12H11V14.5C11 14.7022 10.8782 14.8845 10.6913 14.9619C10.5045 15.0393 10.2894 14.9965 10.1464 14.8536L7.29292 12H2.5C1.11929 12 0 10.8807 0 9.50003V4.50002C0 3.11931 1.11928 2.00003 2.49999 2.00002Z"
+            fill="currentColor"
+            fillRule="evenodd"
+            clipRule="evenodd"
+          ></path>
+        </svg>
+        <p className="font-semibold my-auto text-[#363636]">
+          {chat?.name ? chat?.name : 'Untitled Chat'}
+        </p>
+      </div>
+      <div className="flex flex-row my-auto space-x-2">
+        <RenameDialog
+          id={chat?.id}
+          setRefetchChats={setRefetchChats}
+          setSelectedChat={setSelectedChat}
+          setMessages={setMessages}
+        />
+        <DeleteDialog
+          id={chat?.id}
+          setRefetchChats={setRefetchChats}
+          setSelectedChat={setSelectedChat}
+          setMessages={setMessages}
+        />
+      </div>
+    </button>
+  );
 }
 
 export default function Sidebar({
@@ -437,6 +639,11 @@ export default function Sidebar({
   setModel,
   chat,
   setChat,
+  refetchChats,
+  setRefetchChats,
+  selectedChat,
+  setSelectedChat,
+  setMessages,
 }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [chats, setChats] = useState([]);
@@ -451,6 +658,15 @@ export default function Sidebar({
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (refetchChats && userId) {
+      getChats(userId).then((value) => {
+        setChats(value);
+        setRefetchChats(false);
+      });
+    }
+  }, [refetchChats]);
+
   return (
     <div
       className={
@@ -460,7 +676,13 @@ export default function Sidebar({
     >
       <div className="flex flex-col space-y-4 w-full">
         <div className="flex flex-row w-full space-x-4">
-          <button className="w-5/6 py-1.5 flex flex-row space-x-2 border bg-[#EDEDED] hover:bg-gray-200 justify-center items-center rounded">
+          <button
+            onClick={() => {
+              setSelectedChat('');
+              setMessages([]);
+            }}
+            className="w-5/6 py-1.5 flex flex-row space-x-2 border bg-[#EDEDED] hover:bg-gray-200 justify-center items-center rounded"
+          >
             <TextIcon />
             <p className="text-sm font-medium">New Chat</p>
           </button>
@@ -476,14 +698,63 @@ export default function Sidebar({
           type="text"
         />
       </div>
-      <div className="flex-1 h-full flex flex-col overflow-auto">
-        {chats.length == 0 ? (
+      <div className="flex-1 h-full flex flex-col space-y-2 overflow-auto">
+        {isLoading ? (
+          <div className="flex flex-col w-full mt-4 justify-center items-center">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="my-auto animate-spin"
+            >
+              <g clipPath="url(#clip0_1405_2)">
+                <path
+                  d="M4.84457 21.6005C4.13345 21.0227 3.95568 20.0005 4.53345 19.2449C5.11123 18.5338 6.13345 18.3116 6.88901 18.8894C7.24457 19.1116 7.55568 19.3783 7.95568 19.556C11.289 21.3783 15.4223 20.756 18.089 18.0449C18.7557 17.3783 19.7779 17.3783 20.4446 18.0449C21.0668 18.7116 21.0668 19.7783 20.4446 20.4005C16.7112 24.1783 10.9335 25.1116 6.31123 22.5338C5.7779 22.2671 5.28901 21.9116 4.84457 21.6005Z"
+                  fill="#ff623d"
+                />
+                <path
+                  d="M23.8224 13.9555C23.6891 14.8888 22.8002 15.511 21.8669 15.3777C20.9335 15.2444 20.3558 14.3555 20.4891 13.4221C20.578 12.9332 20.578 12.4444 20.578 11.9555C20.578 8.0888 18.0446 4.75547 14.4891 3.73325C13.6002 3.51103 13.0669 2.53325 13.3335 1.64436C13.6002 0.755471 14.4891 0.222137 15.4224 0.488804C20.4446 1.95547 23.9558 6.62214 23.9558 11.9999C23.9558 12.6666 23.9113 13.3332 23.8224 13.9555Z"
+                  fill="#ff623d"
+                />
+                <path
+                  d="M7.42222 0.843445C8.26667 0.487889 9.24445 0.932334 9.55556 1.82122C9.86667 2.71011 9.46667 3.68789 8.62222 4.04344C5.42222 5.33233 3.28889 8.48789 3.28889 12.0879C3.28889 12.799 3.37778 13.5101 3.55556 14.1768C3.77778 15.0657 3.24444 15.999 2.35556 16.2212C1.46667 16.4434 0.577778 15.9101 0.355556 14.9768C0.133333 13.999 0 13.0212 0 12.0434C0 7.02122 2.97778 2.62122 7.42222 0.843445Z"
+                  fill="#ff623d"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_1405_2">
+                  <rect width="24" height="24" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+        ) : chats.length == 0 ? (
           <NoData />
         ) : (
           <>
-            {chats.map((chat) => {
-              return <Chat />;
-            })}
+            {chats
+              .sort((a: any, b: any) => {
+                //@ts-ignore
+                return (
+                  //@ts-ignore
+                  new Date(b?.created_at) - new Date(a?.created_at)
+                );
+              })
+              .map((chat) => {
+                return (
+                  <Chat
+                    chat={chat}
+                    chats={chats}
+                    setChats={setChats}
+                    selectedChat={selectedChat}
+                    setSelectedChat={setSelectedChat}
+                    setRefetchChats={setRefetchChats}
+                    setMessages={setMessages}
+                  />
+                );
+              })}
           </>
         )}
       </div>

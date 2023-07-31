@@ -6,13 +6,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let chats: any = []
 
-  if (userId == typeof String) {
-    chats = await prisma.chat.findMany({
-      where: {
-        userId: userId
-      }
-    })
-  }
+  chats = await prisma.chat.findMany({
+    where: {
+      userId: userId as string
+    }
+  })
 
   res.status(200).json(chats)
 }
